@@ -69,7 +69,7 @@ void loop() {
   render(count);
 
   if (millis() - ptime > 250) {
-    count++;
+//    count++;
     ptime = millis();
   }
 }
@@ -79,16 +79,15 @@ void loop() {
 void render(long count) {
   for (int x = 0 ; x < NUM_COLS; x++) {
     latch(LOW);   
-
     for (int y = NUM_ROWS_BYTES ; y >= 0 ; y--) {
-        shiftOut(ROWS_DATA, ROWS_SH, LSBFIRST, fb[  (count + (x * NUM_ROWS_BYTES) + y) % (NUM_ROWS_BYTES * NUM_COLS)] );    //
-//        if( x == 5) shiftOut(ROWS_DATA, ROWS_SH, LSBFIRST, 0 );     // esto funciona oK
+          shiftOut(ROWS_DATA, ROWS_SH, LSBFIRST, fb[  (count + (x * NUM_ROWS_BYTES) + y) % (NUM_ROWS_BYTES * NUM_COLS)] );    //
+//        if(x == 5) shiftOut(ROWS_DATA, ROWS_SH, LSBFIRST, 0 );     // esto funciona oK
+//        if(y == 2) shiftOut(ROWS_DATA, ROWS_SH, LSBFIRST, 0 );    // esto tambien funciona !!!
     }
 
     shiftOut(COLS_DATA, COLS_SH, MSBFIRST, cols[x]);
     latch(HIGH);
     delayMicroseconds(10);
-
   }
 
 }
