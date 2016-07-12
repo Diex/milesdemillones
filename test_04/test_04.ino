@@ -24,10 +24,12 @@
 uint8_t cols[] = {col_0, col_1 , col_2 , col_3 , col_4 , col_5 , col_6 , col_7};
 
 #define NUM_ROWS 128
+//#define NUM_ROWS 8
 // voy a dividir esas filas en algo manejable y util
 // es decir que lo acomodo como bytes en el array para que luego sea facil shiftear
 // por eso tomo la medida de "short"
 #define NUM_ROWS_BYTES 16 // 128/8 = 16 bytes
+//#define NUM_ROWS_BYTES 1 // 128/8 = 16 bytes
 // nunca puede ser mas de 8 porque las columnas 
 // se multiplexan en paralelo
 #define NUM_COLS 8 
@@ -52,34 +54,33 @@ void setup() {
 
 
 void initBuffer(){
-      for(int col = 0; col < NUM_COLS; col++){
+//      for(int col = 0; col < NUM_COLS; col++){
+      int col = 0;
       for(int row_byte = 0; row_byte < NUM_ROWS_BYTES; row_byte ++)
       {
               fb[(col * NUM_ROWS_BYTES) + row_byte] = 0xFFFF;
       }    
-    }
-
-  
+//    }
 }
 
 long count = 0;
 void loop() {
 
   debugBuffer();
-for (uint8_t col = 0; col < 8; col++) {
-    latch(LOW);
-    
-    char top = B10101010;
-    char bottom = B01010101;  
-    uint16_t r = ((col + count) % 2) == 0 ? top << 8 | bottom :  bottom << 8 | top;
-    
-    for (int b = 0; b < NUM_ROWS_BYTES; b++) {
-      shiftOut(ROWS_DATA, ROWS_SH, LSBFIRST, r);
-    }
-    shiftOut(COLS_DATA, COLS_SH, MSBFIRST, cols[col]);
-    latch(HIGH);
-
-  }
+//    for (uint8_t col = 0; col < 8; col++) {
+//    latch(LOW);
+//    
+//    char top = B10101010;
+//    char bottom = B01010101;  
+//    uint16_t r = ((col + count) % 2) == 0 ? top << 8 | bottom :  bottom << 8 | top;
+//    
+//    for (int b = 0; b < NUM_ROWS_BYTES; b++) {
+//      shiftOut(ROWS_DATA, ROWS_SH, LSBFIRST, r);
+//    }
+//    shiftOut(COLS_DATA, COLS_SH, MSBFIRST, cols[col]);
+//    latch(HIGH);
+//
+//  }
   count++;
 }
 
@@ -89,19 +90,17 @@ void debugBuffer(){
     Serial.print("buffer length: ");    
     Serial.println((sizeof(fb) / sizeof(*fb)));
     
-    for(int col = 0; col < NUM_COLS; col++){
+    for(int col = 0; col < NUM_COLS; col++){      
       for(int row_byte = 0; row_byte < NUM_ROWS_BYTES; row_byte ++)
       {
-              Serial.print(fb[(col * NUM_ROWS_BYTES) + row_byte], BIN);
+        for(int bits = 7; bits >= 0; bits--){  // LSBFIRST
+          uint8_t b = (fb[(col * NUM_ROWS_BYTES) + row_byte] >> bits) & 1;
+          Serial.print(b);
+        }
+        Serial.print('|');
       }    
       Serial.println();
     }
-    
-    for(int px = 0; px < NUM_COLS * NUM_ROWS_BYTES; px++){
-
-    }
-
-    Serial.println();    
 }
 
 void render(){

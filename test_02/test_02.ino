@@ -42,13 +42,16 @@ void setup() {
   //  cross();
 //  arrow();
 
+
+
 }
 
 
 uint16_t count = 0;
 uint32_t ptime = 0;
 void loop() {
-  for (uint8_t col = 0; col < 8; col++) {
+
+    for (uint8_t col = 0; col < 8; col++) {
     latch(LOW);
     
     char top = B10101010;
@@ -59,16 +62,18 @@ void loop() {
     renderColumn(col);
     scanCol(col);
     latch(HIGH);
-//    delay(10);
+    delay(1);
   }
+
   
-  
+//  
+//  
   if(millis() - ptime > 500) {
     ptime = millis();
     count++;
   }
-
-
+//
+//
 
 
 }
