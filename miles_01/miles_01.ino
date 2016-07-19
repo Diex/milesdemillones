@@ -73,12 +73,10 @@ long ptime = 0;
 
 void loop() {
   render(count);
-  count ++;
-  return;
 
-  if (millis() - ptime > 250) {
+  if (millis() - ptime > 100) {
     count++;
-    randomizeSome(100);
+    randomizePanel(count % 8);
     ptime = millis();
   }
 }
@@ -86,12 +84,45 @@ void loop() {
 void render(long count) {
   for (int x = 0 ; x < NUM_COLS; x++) {
     for (int y = (NUM_ROWS_BYTES  - 1 ) ; y >= 0 ; y --) {
-      SPI.transfer(B10000001);
-      SPI.transfer(B10000001);
+      SPI.transfer(fb[(x * NUM_ROWS_BYTES) + y]);
     }
-    shiftOut(COLS_DATA, COLS_SH, LSBFIRST, cols[0]);
+    shiftOut(COLS_DATA, COLS_SH, LSBFIRST, cols[x]);
     latch();
   }
+}
+
+void addByte(short num){
+  for(int i = NUM_ROWS_BYTES * NUM_COLS;  i > 0 ; i--){
+    fb[i] = fb[i-1];
+  }
+  fb[0] = num; 
+}
+
+void add128(uint8_t * num){
+  
+  for(int col = NUM_COLS; col > 0; col--){ // la 0 no.
+    swapColumn(col, col-1);
+  }  
+  
+  for(int b = 0 ;  b < 16; b++){
+    fb[b] = num[b];
+  }
+
+}
+
+void randomizePanel(int w){
+    for(int x = 0; x < NUM_COLS; x++){
+      for(int y = 0; y < 2; y++){
+        fb[(w * 2) + y + (x * NUM_ROWS_BYTES)] = random(0, 255);
+      }
+    }
+}
+
+void swapColumn(int dest, int src){
+  for(int byt = NUM_ROWS_BYTES; byt > 0; byt--){
+      fb[(dest * NUM_ROWS_BYTES) + byt] = fb[(src  * NUM_ROWS_BYTES)  + byt];
+  }
+  
 }
 
 
