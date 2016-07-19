@@ -74,9 +74,11 @@ long ptime = 0;
 void loop() {
   render(count);
 
-  if (millis() - ptime > 100) {
+  if (millis() - ptime > 1) {
     count++;
-    randomizePanel(count % 8);
+
+    swapPanel((count - 1) % 8, count % 8);
+        if(count%8 == 0) randomizePanel(0);
     ptime = millis();
   }
 }
@@ -98,16 +100,13 @@ void addByte(short num){
   fb[0] = num; 
 }
 
-void add128(uint8_t * num){
-  
+void add128(uint8_t * num){ 
   for(int col = NUM_COLS; col > 0; col--){ // la 0 no.
     swapColumn(col, col-1);
-  }  
-  
+  }   
   for(int b = 0 ;  b < 16; b++){
     fb[b] = num[b];
   }
-
 }
 
 void randomizePanel(int w){
@@ -122,7 +121,14 @@ void swapColumn(int dest, int src){
   for(int byt = NUM_ROWS_BYTES; byt > 0; byt--){
       fb[(dest * NUM_ROWS_BYTES) + byt] = fb[(src  * NUM_ROWS_BYTES)  + byt];
   }
-  
+}
+
+void swapPanel(int src, int dest){
+  for(int x = 0; x < NUM_COLS; x++){
+      for(int y = 0; y < 2; y++){
+        fb[(dest * 2) + y + (x * NUM_ROWS_BYTES)] = fb[(src * 2) + y + (x * NUM_ROWS_BYTES)];
+      }
+    }
 }
 
 
