@@ -69,6 +69,7 @@ void loop() {
 
   if (millis() - ptime > 250) {
     count++;
+    randomizeSome(100);
     ptime = millis();
   }
 }
@@ -77,11 +78,9 @@ void loop() {
 // escanea linea por linea y la dibuja...
 void render(long count) {
   for (int x = 0 ; x < NUM_COLS; x++) {
-
     for (int y = NUM_ROWS_BYTES ; y >= 0 ; y--) {
           shiftOut(ROWS_DATA, ROWS_SH, LSBFIRST, fb[(x * NUM_ROWS_BYTES) + y]); //fb[  (count + (x * NUM_ROWS_BYTES) + y) % (NUM_ROWS_BYTES * NUM_COLS)] );    //
     }
-
     shiftOut(COLS_DATA, COLS_SH, LSBFIRST, cols[x]);
     latch();   
   }
@@ -89,10 +88,14 @@ void render(long count) {
 }
 
 
+void randomizeSome(int howMany){
+    for(int i = 0; i < howMany; i++){
+      fb[random(0, NUM_ROWS_BYTES * NUM_COLS)] = random(0, 255);
+    }
+}
+
 void latch() {
-  
   digitalWrite(LATCH, LOW);
-//  delayMicroseconds(2);
   digitalWrite(LATCH, HIGH);
 }
 
