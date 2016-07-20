@@ -37,6 +37,7 @@ uint8_t cols[] = {col_0, col_1 , col_2 , col_3 , col_4 , col_5 , col_6 , col_7};
 // nunca puede ser mas de 8 porque las columnas
 // se multiplexan en paralelo
 #define NUM_COLS 8
+#define NUM_PANELS 8
 // como es una pantalla cada bit es un pixel (blanco o negro)
 // solo se que mide tantos x tantos pixels
 uint8_t fb[NUM_COLS * NUM_ROWS_BYTES ] = {};
@@ -70,15 +71,18 @@ void initBuffer() {
 
 long count = 0;
 long ptime = 0;
-
+int del = 30 ;
 void loop() {
   render(count);
-
-  if (millis() - ptime > 1) {
+  if (millis() - ptime > del ) {
     count++;
-
+//    for (int p = NUM_PANELS; p > 0 ; p--) {
+//      swapPanel(p - 1, p);
+//    }
+//    randomizePanel(0);
     swapPanel((count - 1) % 8, count % 8);
-        if(count%8 == 0) randomizePanel(0);
+    if(count%8 == 0) randomizePanel(0);
+
     ptime = millis();
   }
 }
@@ -93,42 +97,42 @@ void render(long count) {
   }
 }
 
-void addByte(short num){
-  for(int i = NUM_ROWS_BYTES * NUM_COLS;  i > 0 ; i--){
-    fb[i] = fb[i-1];
+void addByte(short num) {
+  for (int i = NUM_ROWS_BYTES * NUM_COLS;  i > 0 ; i--) {
+    fb[i] = fb[i - 1];
   }
-  fb[0] = num; 
+  fb[0] = num;
 }
 
-void add128(uint8_t * num){ 
-  for(int col = NUM_COLS; col > 0; col--){ // la 0 no.
-    swapColumn(col, col-1);
-  }   
-  for(int b = 0 ;  b < 16; b++){
+void add128(uint8_t * num) {
+  for (int col = NUM_COLS; col > 0; col--) { // la 0 no.
+    swapColumn(col, col - 1);
+  }
+  for (int b = 0 ;  b < 16; b++) {
     fb[b] = num[b];
   }
 }
 
-void randomizePanel(int w){
-    for(int x = 0; x < NUM_COLS; x++){
-      for(int y = 0; y < 2; y++){
-        fb[(w * 2) + y + (x * NUM_ROWS_BYTES)] = random(0, 255);
-      }
+void randomizePanel(int w) {
+  for (int x = 0; x < NUM_COLS; x++) {
+    for (int y = 0; y < 2; y++) {
+      fb[(w * 2) + y + (x * NUM_ROWS_BYTES)] = random(0, 255);
     }
-}
-
-void swapColumn(int dest, int src){
-  for(int byt = NUM_ROWS_BYTES; byt > 0; byt--){
-      fb[(dest * NUM_ROWS_BYTES) + byt] = fb[(src  * NUM_ROWS_BYTES)  + byt];
   }
 }
 
-void swapPanel(int src, int dest){
-  for(int x = 0; x < NUM_COLS; x++){
-      for(int y = 0; y < 2; y++){
-        fb[(dest * 2) + y + (x * NUM_ROWS_BYTES)] = fb[(src * 2) + y + (x * NUM_ROWS_BYTES)];
-      }
+void swapColumn(int dest, int src) {
+  for (int byt = NUM_ROWS_BYTES; byt > 0; byt--) {
+    fb[(dest * NUM_ROWS_BYTES) + byt] = fb[(src  * NUM_ROWS_BYTES)  + byt];
+  }
+}
+
+void swapPanel(int src, int dest) {
+  for (int x = 0; x < NUM_COLS; x++) {
+    for (int y = 0; y < 2; y++) {
+      fb[(dest * 2) + y + (x * NUM_ROWS_BYTES)] = fb[(src * 2) + y + (x * NUM_ROWS_BYTES)];
     }
+  }
 }
 
 
