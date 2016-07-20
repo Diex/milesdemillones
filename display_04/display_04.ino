@@ -72,16 +72,16 @@ int syncPulses = 0;
 
 void sync(){
   syncPulses++;
-  if(syncPulses == 128 * 8){
+  if(syncPulses == 128 ){
     setData();
     syncPulses = 0;
   }
 }
 
+unsigned int w = 0;
 void setData(){
-  for(int i =0 ; i < 8 ; i++){
-    data[i] = decodeHexa(random(16));
-  }
+    w++;
+    data[w%8] = decodeHexa(random(16));
 }
 
 void render() {
