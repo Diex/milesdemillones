@@ -58,41 +58,29 @@ void initBuffer() {
 long count = 0;
 
 long ptime = 0;
-long dtime = 100;
+long dtime = 1000;
 
 uint16_t demo[] = {
   B11111111 << 8 | B11111111,
-    0,
-    0,
-0,
- 0,
+  0,
+  0,
+  0,
+  0,
   0,
   0,
   0
 };
 
-
-void loop() {
-  render(count);
-
-  if(millis() - ptime > dtime){
-    for(int i = 0 ; i < 8; i++){
-      demo[i] = random(UINT_MAX);
-    }
-    ptime = millis();
-  }
-
-
-//  delay(100);
-//  if (millis() - ptime > del ) {
-//    count++;
-//    swapPanel((count - 1) % 8, count % 8);
-//    if(count%8 == 0) randomizePanel(0);
-//    ptime = millis();
-//  }
-}
-
-
+uint16_t demo1[] = {
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  B11111111 << 8 | B11111111
+};
 uint16_t f1[8];
 uint16_t f2[8];
 uint16_t f3[8];
@@ -102,15 +90,65 @@ uint16_t f6[8];
 uint16_t f7[8];
 uint16_t f8[8];
 uint16_t f9[8];
- 
- uint16_t * panels[8] = {demo, f1, f1, f1, f1, f1, f1, f1};
+
+uint16_t * panels[8] = {demo, f2, f3, f4, f5, f6, f7, demo1};
+
+void loop() {
+  render(count);
+
+  if (millis() - ptime > dtime) {
+
+    for (int i = 1 ; i < 8 ; i++) {
+      //      panels[i] = *panels[i - 1];
+      //        swapPanels(panels[i], panels[i-1]);
+    }
+
+
+    uint16_t *temp = panels[0]; // copia el contenido
+    panels[0] = panels[1]; // copia el contenido
+    panels[1] = panels[2]; // copia el contenido
+    panels[2] = panels[3]; // copia el contenido
+    panels[3] = panels[4]; // copia el contenido
+    panels[4] = panels[5]; // copia el contenido
+    panels[5] = panels[6]; // copia el contenido
+    panels[6] = panels[7]; // copia el contenido
+    panels[7] = temp;
+
+
+
+    //    panels[0] = panels[8];
+
+    //    for(int row = 8 ; row > 0 ; row--){
+    //      panels[0][row] = count % 8 == row ? UINT_MAX:0;
+    //    }
+
+    count ++;
+    ptime = millis();
+  }
+
+
+  //  delay(100);
+  //  if (millis() - ptime > del ) {
+  //    count++;
+  //    swapPanel((count - 1) % 8, count % 8);
+  //    if(count%8 == 0) randomizePanel(0);
+  //    ptime = millis();
+  //  }
+}
+
+void swapPanels(uint16_t from, uint16_t to) {
+
+  //    &to = from;
+
+}
+
 
 void render(long count) {
-  for (int column = 0 ; column < NUM_COLS; column++) { 
-    for (int panel = 0; panel < NUM_PANELS ; panel ++) {  // shifteo una columna para cada panel. el panel 0 es el ultimo.        
-        SPI.transfer(panels[panel][column] >> 8);
-        SPI.transfer(panels[panel][column]);
-    }    
+  for (int column = 0 ; column < NUM_COLS; column++) {
+    for (int panel = 0; panel < NUM_PANELS ; panel ++) {  // shifteo una columna para cada panel. el panel 0 es el ultimo.
+      SPI.transfer(panels[panel][column] >> 8);
+      SPI.transfer(panels[panel][column]);
+    }
     latch(column);
   }
 }
