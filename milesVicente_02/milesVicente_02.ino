@@ -58,7 +58,10 @@ void initBuffer() {
 long count = 0;
 
 long ptime = 0;
-long dtime = 1000;
+long dtime = 100;
+
+// http://unixwiz.net/techtips/reading-cdecl.html
+
 
 uint16_t demo[] = {
   B11111111 << 8 | B11111111,
@@ -91,20 +94,35 @@ uint16_t f7[8];
 uint16_t f8[8];
 uint16_t f9[8];
 
-uint16_t * panels[8] = {demo, f2, f3, f4, f5, f6, f7, demo1};
+uint16_t * panels[9] = {f1, f2, f3, f4, f5, f6, f7, demo, f9};
+
+unsigned char reg = 1;
+
+unsigned char generateNoise(){
+  unsigned long int newr;
+   unsigned char lobit;
+   unsigned char b31, b29, b25, b24;
+   
+   b31 = (reg & (1L << 31)) >> 31;
+   b29 = (reg & (1L << 29)) >> 29;
+   b25 = (reg & (1L << 25)) >> 25;
+   b24 = (reg & (1L << 24)) >> 24;
+   lobit = b31 ^ b29 ^ b25 ^ b24;
+   newr = (reg << 1) | lobit;
+   reg = newr;
+   return reg & 1;
+  } // Changing this value changes the frequency.
 
 void loop() {
   render(count);
-
   if (millis() - ptime > dtime) {
-
-    for (int i = 1 ; i < 8 ; i++) {
-      //      panels[i] = *panels[i - 1];
-      //        swapPanels(panels[i], panels[i-1]);
+//    black();
+//    delay(150);
+    uint16_t *temp = panels[0]; // copia el contenido
+    for(int row = 8 ; row > 0 ; row--){
+          temp[row] =  random(UINT_MAX); //(count % 8 == row) ? UINT_MAX : 0;//generateNoise() << 8 | generateNoise();//
     }
 
-
-    uint16_t *temp = panels[0]; // copia el contenido
     panels[0] = panels[1]; // copia el contenido
     panels[1] = panels[2]; // copia el contenido
     panels[2] = panels[3]; // copia el contenido
@@ -113,15 +131,7 @@ void loop() {
     panels[5] = panels[6]; // copia el contenido
     panels[6] = panels[7]; // copia el contenido
     panels[7] = temp;
-
-
-
-    //    panels[0] = panels[8];
-
-    //    for(int row = 8 ; row > 0 ; row--){
-    //      panels[0][row] = count % 8 == row ? UINT_MAX:0;
-    //    }
-
+        
     count ++;
     ptime = millis();
   }
@@ -151,6 +161,19 @@ void render(long count) {
     }
     latch(column);
   }
+}
+
+void black(){
+  
+
+  for (int column = 0 ; column < NUM_COLS; column++) {
+    for (int panel = 0; panel < NUM_PANELS ; panel ++) {  // shifteo una columna para cada panel. el panel 0 es el ultimo.
+      SPI.transfer(0);
+      SPI.transfer(0);
+    }
+    latch(column);
+  }
+
 }
 
 void addByte(short num) {
