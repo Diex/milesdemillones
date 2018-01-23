@@ -28,42 +28,9 @@ uint8_t cols[] = {col_0, col_1 , col_2 , col_3 , col_4 , col_5 , col_6 , col_7};
 // solo se que mide tantos x tantos pixels
 uint8_t fb[NUM_COLS * NUM_ROWS_BYTES ] = {};
 
+      uint16_t * temp ;
 
-void setup() {
-  // TODO test para chequear que este bien conectado.
-  pinMode(LATCH, OUTPUT);
-  pinMode(COLS_DATA, OUTPUT);
-  pinMode(COLS_SH, OUTPUT);
-
-  digitalWrite(SS, HIGH);  // ensure SS stays high
-  Serial.begin(115200);
-  SPI.begin ();
-
-  SPI.setBitOrder(LSBFIRST);
-  SPI.setDataMode(SPI_MODE0);
-  SPI.setClockDivider (SPI_CLOCK_DIV8);
-  initBuffer();
-}
-
-
-void initBuffer() {
-  for (int col = 0; col < NUM_COLS; col++) {
-    for (int row_byte = 0; row_byte < NUM_ROWS_BYTES; row_byte ++)
-    {
-      fb[(col * NUM_ROWS_BYTES) + row_byte] = random(0, 255);
-    }
-  }
-}
-
-long count = 0;
-
-long ptime = 0;
-long dtime = 100;
-
-// http://unixwiz.net/techtips/reading-cdecl.html
-
-
-uint16_t demo[] = {
+      uint16_t demo[] = {
   B11111111 << 8 | B11111111,
   0,
   0,
@@ -92,9 +59,49 @@ uint16_t f5[8];
 uint16_t f6[8];
 uint16_t f7[8];
 uint16_t f8[8];
-uint16_t f9[8];
+//uint16_t f9[8];
 
-uint16_t * panels[9] = {f1, f2, f3, f4, f5, f6, f7, demo, f9};
+uint16_t * panels[8] = {f1, f2, f3, f4, f5, f6, f7, f8};
+
+      
+void setup() {
+  // TODO test para chequear que este bien conectado.
+  pinMode(LATCH, OUTPUT);
+  pinMode(COLS_DATA, OUTPUT);
+  pinMode(COLS_SH, OUTPUT);
+
+  digitalWrite(SS, HIGH);  // ensure SS stays high
+  Serial.begin(115200);
+  SPI.begin ();
+
+  SPI.setBitOrder(LSBFIRST);
+  SPI.setDataMode(SPI_MODE0);
+  SPI.setClockDivider (SPI_CLOCK_DIV8);
+  initBuffer();
+
+  temp = panels[0]; // temp guarda la direccion de panels[0]
+    Serial.println(*temp);
+
+}
+
+
+void initBuffer() {
+  for (int col = 0; col < NUM_COLS; col++) {
+    for (int row_byte = 0; row_byte < NUM_ROWS_BYTES; row_byte ++)
+    {
+      fb[(col * NUM_ROWS_BYTES) + row_byte] = random(0, 255);
+    }
+  }
+}
+
+long count = 0;
+
+long ptime = 0;
+long dtime = 100;
+
+// http://unixwiz.net/techtips/reading-cdecl.html
+
+
 
 unsigned char reg = 1;
 
@@ -113,24 +120,29 @@ unsigned char generateNoise(){
    return reg & 1;
   } // Changing this value changes the frequency.
 
+uint16_t lastw = 0;
 void loop() {
   render(count);
-  if (millis() - ptime > dtime) {
-//    black();
-//    delay(150);
-    uint16_t *temp = panels[0]; // copia el contenido
+  // random(UINT_MAX); //(count % 8 == row) ? UINT_MAX : 0;//generateNoise() << 8 | generateNoise();//
+  if (millis() - ptime > dtime) {    
+
     for(int row = 8 ; row > 0 ; row--){
-          temp[row] =  random(UINT_MAX); //(count % 8 == row) ? UINT_MAX : 0;//generateNoise() << 8 | generateNoise();//
+          panels[lastw] = temp;          
+          uint16_t w = random(8);
+          temp =  panels[w];      
+          panels[w] = demo;
+          lastw = w;
     }
 
-    panels[0] = panels[1]; // copia el contenido
-    panels[1] = panels[2]; // copia el contenido
-    panels[2] = panels[3]; // copia el contenido
-    panels[3] = panels[4]; // copia el contenido
-    panels[4] = panels[5]; // copia el contenido
-    panels[5] = panels[6]; // copia el contenido
-    panels[6] = panels[7]; // copia el contenido
-    panels[7] = temp;
+
+//    panels[0] = panels[1]; // copia el contenido
+//    panels[1] = panels[2]; // copia el contenido
+//    panels[2] = panels[3]; // copia el contenido
+//    panels[3] = panels[4]; // copia el contenido
+//    panels[4] = panels[5]; // copia el contenido
+//    panels[5] = panels[6]; // copia el contenido
+//    panels[6] = panels[7]; // copia el contenido
+//    panels[7] = temp;
         
     count ++;
     ptime = millis();
