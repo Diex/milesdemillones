@@ -61,7 +61,7 @@ uint16_t f7[8];
 uint16_t f8[8];
 //uint16_t f9[8];
 
-uint16_t * panels[8] = {f1, f2, f3, f4, f5, f6, f7, f8};
+uint16_t * panels[8] = {demo, f2, f3, f4, f5, f6, f7, f8};
 
       
 void setup() {
@@ -82,6 +82,9 @@ void setup() {
   temp = panels[0]; // temp guarda la direccion de panels[0]
     Serial.println(*temp);
 
+//    for(int col = 8 ; col >= 0 ; col--){
+//          panels[0][col] = random(UINT_MAX);
+//    }
 }
 
 
@@ -97,7 +100,7 @@ void initBuffer() {
 long count = 0;
 
 long ptime = 0;
-long dtime = 100;
+long dtime = 1000;
 
 // http://unixwiz.net/techtips/reading-cdecl.html
 
@@ -124,38 +127,40 @@ uint16_t lastw = 0;
 void loop() {
   render(count);
   // random(UINT_MAX); //(count % 8 == row) ? UINT_MAX : 0;//generateNoise() << 8 | generateNoise();//
+//  return;
   if (millis() - ptime > dtime) {    
 
-    for(int row = 8 ; row > 0 ; row--){
-          panels[lastw] = temp;          
-          uint16_t w = random(8);
-          temp =  panels[w];      
-          panels[w] = demo;
-          lastw = w;
+//    for(int row = 8 ; row > 0 ; row--){
+//          panels[lastw] = temp;          
+//          uint16_t w = random(8);
+//          temp =  panels[w];      
+//          panels[w] = demo;
+//          lastw = w;
+//    }
+
+//    for(int col = 8 ; col >= 0 ; col--){
+//          panels[0][col] = random(UINT_MAX);
+//    }
+    
+    
+    uint16_t temp = panels[7];
+
+    for(int col = 8 ; col >= 0 ; col--){
+          panels[7][col] = random(UINT_MAX);
+    }
+    
+
+    for(int panel = 7 ; panel > 0 ; panel--){
+          panels[panel] = panels[panel - 1]; 
     }
 
-
-//    panels[0] = panels[1]; // copia el contenido
-//    panels[1] = panels[2]; // copia el contenido
-//    panels[2] = panels[3]; // copia el contenido
-//    panels[3] = panels[4]; // copia el contenido
-//    panels[4] = panels[5]; // copia el contenido
-//    panels[5] = panels[6]; // copia el contenido
-//    panels[6] = panels[7]; // copia el contenido
-//    panels[7] = temp;
+    panels[0] = temp; 
+    
+    
         
     count ++;
     ptime = millis();
   }
-
-
-  //  delay(100);
-  //  if (millis() - ptime > del ) {
-  //    count++;
-  //    swapPanel((count - 1) % 8, count % 8);
-  //    if(count%8 == 0) randomizePanel(0);
-  //    ptime = millis();
-  //  }
 }
 
 void swapPanels(uint16_t from, uint16_t to) {
