@@ -5,9 +5,9 @@
 #include <SPI.h>
 
 
-#define LATCH 6 // PORTB2 (pin 10)
+#define LATCH 6           // PORTB2 (pin 10)
 #define COLS_DATA 7       //PORTB3 (pin 11)
-#define COLS_SH   8          //PORTB0 (pin 8)
+#define COLS_SH   8       //PORTB0 (pin 8)
 
 #define col_0 B00000001
 #define col_1 B00000010
@@ -27,8 +27,6 @@ uint8_t cols[] = {col_0, col_1 , col_2 , col_3 , col_4 , col_5 , col_6 , col_7};
 // como es una pantalla cada bit es un pixel (blanco o negro)
 // solo se que mide tantos x tantos pixels
 uint8_t fb[NUM_COLS * NUM_ROWS_BYTES ] = {};
-
-      uint16_t * temp ;
 
       uint16_t demo[] = {
   B11111111 << 8 | B11111111,
@@ -51,18 +49,30 @@ uint16_t demo1[] = {
   0,
   B11111111 << 8 | B11111111
 };
-uint16_t f1[8];
-uint16_t f2[8];
-uint16_t f3[8];
-uint16_t f4[8];
-uint16_t f5[8];
-uint16_t f6[8];
-uint16_t f7[8];
-uint16_t f8[8];
-//uint16_t f9[8];
 
-uint16_t * panels[8] = {demo, f2, f3, f4, f5, f6, f7, f8};
+uint16_t white[] = {
+  B11111111 << 8 | B11111111,
+  B11111111 << 8 | B11111111,
+  B11111111 << 8 | B11111111,
+  B11111111 << 8 | B11111111,
+  B11111111 << 8 | B11111111,
+  B11111111 << 8 | B11111111,
+  B11111111 << 8 | B11111111,
+  B11111111 << 8 | B11111111
+  };
+  
+uint16_t  f1[8];
+uint16_t  f2[8];
+uint16_t  f3[8];
+uint16_t  f4[8];
+uint16_t  f5[8];
+uint16_t  f6[8];
+uint16_t  f7[8];
+uint16_t  f8[8];
 
+
+uint16_t * panels[8] = {f1, f2, f3, f4, f5,f6, f7 ,f8}; //{white, white, white, white, white, white, white, white};
+uint16_t * temp;
       
 void setup() {
   // TODO test para chequear que este bien conectado.
@@ -97,10 +107,9 @@ void initBuffer() {
   }
 }
 
-long count = 0;
-
-long ptime = 0;
-long dtime = 20;
+unsigned long count = 0;
+unsigned long ptime = 0;
+unsigned long dtime = 60;
 
 // http://unixwiz.net/techtips/reading-cdecl.html
 
@@ -124,41 +133,34 @@ unsigned char generateNoise(){
   } // Changing this value changes the frequency.
 
 uint16_t lastw = 0;
+
 void loop() {
-  render(count);
-  if (millis() - ptime > dtime) {    
+  render();
 
+  
+  Serial.println(ptime);
+//  return;
+//  dtime = constrain(dtime + random(-1, 1), 0, 100);
+  
+  
+  if ((unsigned long)(millis() - ptime) > dtime) {    
     
-    uint16_t temp = panels[7];
-
+     temp = panels[7];
     for(int col = 8 ; col >= 0 ; col--){
           panels[7][col] = random(UINT_MAX);
     }
-    
-
     for(int panel = 7 ; panel > 0 ; panel--){
           panels[panel] = panels[panel - 1]; 
     }
-
-    panels[0] = temp; 
-    
-    
-        
-    count ++;
+    panels[0] = temp;     
     ptime = millis();
   }
 }
 
-void swapPanels(uint16_t from, uint16_t to) {
 
-  //    &to = from;
-
-}
-
-
-void render(long count) {
+void render() {
   for (int column = 0 ; column < NUM_COLS; column++) {
-    for (int panel = 0; panel < NUM_PANELS ; panel ++) {  // shifteo una columna para cada panel. el panel 0 es el ultimo.
+    for (int panel = 7; panel >= 0 ; panel --) {  // shifteo una columna para cada panel. el panel 0 es el ultimo.
       SPI.transfer(panels[panel][column] >> 8);
       SPI.transfer(panels[panel][column]);
     }
@@ -167,8 +169,6 @@ void render(long count) {
 }
 
 void black(){
-  
-
   for (int column = 0 ; column < NUM_COLS; column++) {
     for (int panel = 0; panel < NUM_PANELS ; panel ++) {  // shifteo una columna para cada panel. el panel 0 es el ultimo.
       SPI.transfer(0);
@@ -179,50 +179,6 @@ void black(){
 
 }
 
-void addByte(short num) {
-  for (int i = NUM_ROWS_BYTES * NUM_COLS;  i > 0 ; i--) {
-    fb[i] = fb[i - 1];
-  }
-  fb[0] = num;
-}
-
-void add128(uint8_t * num) {
-  for (int col = NUM_COLS; col > 0; col--) { // la 0 no.
-    swapColumn(col, col - 1);
-  }
-  for (int b = 0 ;  b < 16; b++) {
-    fb[b] = num[b];
-  }
-}
-
-void randomizePanel(int w) {
-  for (int x = 0; x < NUM_COLS; x++) {
-    for (int y = 0; y < 2; y++) {
-      fb[(w * 2) + y + (x * NUM_ROWS_BYTES)] = random(0, 255);
-    }
-  }
-}
-
-void swapColumn(int dest, int src) {
-  for (int byt = NUM_ROWS_BYTES; byt > 0; byt--) {
-    fb[(dest * NUM_ROWS_BYTES) + byt] = fb[(src  * NUM_ROWS_BYTES)  + byt];
-  }
-}
-
-void swapPanel(int src, int dest) {
-  for (int x = 0; x < NUM_COLS; x++) {
-    for (int y = 0; y < 2; y++) {
-      fb[(dest * 2) + y + (x * NUM_ROWS_BYTES)] = fb[(src * 2) + y + (x * NUM_ROWS_BYTES)];
-    }
-  }
-}
-
-
-void randomizeSome(int howMany) {
-  for (int i = 0; i < howMany; i++) {
-    fb[random(0, NUM_ROWS_BYTES * NUM_COLS)] = random(0, 255);
-  }
-}
 
 void latch(int column) {
   shiftOut(COLS_DATA, COLS_SH, LSBFIRST, cols[column]);
