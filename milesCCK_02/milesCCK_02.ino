@@ -32,14 +32,27 @@ uint8_t cols[] = {col_0, col_1 , col_2 , col_3 , col_4 , col_5 , col_6 , col_7};
 
 uint16_t value = 0;
 boolean found = false;
-const uint16_t key0 = B11111111 << 8 | B11111111;
-const uint16_t key1 = B11111111 << 8 | B11111111;
-const uint16_t key2 = B11111111 << 8 | B11111111;
-const uint16_t key3 = B11111111 << 8 | B11111111;
-const uint16_t key4 = B11111111 << 8 | B11111111;
-const uint16_t key5 = B11111111 << 8 | B11111111;
-const uint16_t key6 = B11111111 << 8 | B11111111;
-const uint16_t key7 = B11111111 << 8 | B11111111;
+
+//const uint16_t key0 = B11111111 << 8 | B11111111;
+//const uint16_t key1 = B11111111 << 8 | B11111111;
+//const uint16_t key2 = B11111111 << 8 | B11111111;
+//const uint16_t key3 = B11111111 << 8 | B11111111;
+//const uint16_t key4 = B11111111 << 8 | B11111111;
+//const uint16_t key5 = B11111111 << 8 | B11111111;
+//const uint16_t key6 = B11111111 << 8 | B11111111;
+//const uint16_t key7 = B11111111 << 8 | B11111111;
+
+
+// la clave la generamos de forma natural tirando una moneda de 1 peso
+// sol 1 / escudo 0
+const uint16_t key0 = B10000101 << 8 | B11001001; // juan muiño
+const uint16_t key1 = B11000001 << 8 | B11000110; // rodrigo alcon
+const uint16_t key2 = B00001101 << 8 | B11011101; // juan hoff
+const uint16_t key3 = B00010110 << 8 | B00110011;
+const uint16_t key4 = B01001011 << 8 | B10001100;
+const uint16_t key5 = B00011001 << 8 | B11001011;
+const uint16_t key6 = B01101111 << 8 | B00100011;
+const uint16_t key7 = B11110001 << 8 | B10010000; // diex
 
 uint16_t key[] = {key0, key1, key2, key3, key4, key5, key6, key7};
 
@@ -93,7 +106,6 @@ void setup() {
   pinMode(BUZZER, OUTPUT);
   digitalWrite(BUZZER, LOW);
 
-
   getRandomSeed();
   
 }
@@ -102,14 +114,13 @@ void getRandomSeed()
 {
   uint16_t seed = 0;
   for(int i = 0; i < 1E3; i++) seed += seed ^ analogRead(random(6));
-  Serial.print("seed: ");
-  Serial.println(seed);
+  randomSeed(seed);
 }
 
 // http://unixwiz.net/techtips/reading-cdecl.html
 unsigned long count = 0;
 unsigned long ptime = 0;
-unsigned long dtime = 30;
+unsigned long dtime = 60;
 
 
 void loop() {

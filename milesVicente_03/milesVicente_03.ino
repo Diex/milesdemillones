@@ -71,7 +71,7 @@ uint16_t  f7[8];
 uint16_t  f8[8];
 
 
-uint16_t * panels[8] = {f1, f2, f3, f4, f5,f6, f7 ,f8}; //{white, white, white, white, white, white, white, white};
+uint16_t * panels[8] = {f1, f2, f3, f4, f5,f6, f7 ,f8}; // {white, white, white, white, white, white, white, white}; // //
 uint16_t * temp;
       
 void setup() {
@@ -138,7 +138,7 @@ void loop() {
   render();
 
   
-  Serial.println(ptime);
+//  Serial.println(ptime);
 //  return;
 //  dtime = constrain(dtime + random(-1, 1), 0, 100);
   
